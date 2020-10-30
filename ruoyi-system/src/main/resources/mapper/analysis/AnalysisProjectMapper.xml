@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.analysis.mapper.AnalysisProjectMapper">
+    
+    <resultMap type="AnalysisProject" id="AnalysisProjectResult">
+        <result property="id"    column="id"    />
+        <result property="projectName"    column="project_name"    />
+        <result property="testId"    column="test_id"    />
+        <result property="developId"    column="develop_id"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+
+    <sql id="selectAnalysisProjectVo">
+        select id, project_name, test_id, develop_id, remark from analysis_project
+    </sql>
+
+    <!--查询日志分析项目数据-->
+    <select id="selectAnalysisProjectList" parameterType="AnalysisProject" resultMap="AnalysisProjectResult">
+        <include refid="selectAnalysisProjectVo"/>
+        <where>  
+            <if test="projectName != null  and projectName != ''"> and project_name like concat('%', #{projectName}, '%')</if>
+            <if test="testId != null  and testId != ''"> and test_id = #{testId}</if>
+            <if test="developId != null  and developId != ''"> and develop_id = #{developId}</if>
+        </where>
+    </select>
+    
+    <select id="selectAnalysisProjectById" parameterType="Long" resultMap="AnalysisProjectResult">
+        <include refid="selectAnalysisProjectVo"/>
+        where id = #{id}
+    </select>
+
+    <!--新增 日志分析项目信息-->
+    <insert id="insertAnalysisProject" parameterType="AnalysisProject" useGeneratedKeys="true" keyProperty="id">
+        insert into analysis_project
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="projectName != null">project_name,</if>
+            <if test="testId != null">test_id,</if>
+            <if test="developId != null">develop_id,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="projectName != null">#{projectName},</if>
+            <if test="testId != null">#{testId},</if>
+            <if test="developId != null">#{developId},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAnalysisProject" parameterType="AnalysisProject">
+        update analysis_project
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectName != null">project_name = #{projectName},</if>
+            <if test="testId != null">test_id = #{testId},</if>
+            <if test="developId != null">develop_id = #{developId},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAnalysisProjectById" parameterType="Long">
+        delete from analysis_project where id = #{id}
+    </delete>
+
+    <delete id="deleteAnalysisProjectByIds" parameterType="String">
+        delete from analysis_project where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

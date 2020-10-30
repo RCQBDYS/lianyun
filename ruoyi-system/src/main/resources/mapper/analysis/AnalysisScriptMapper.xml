@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.analysis.mapper.AnalysisScriptMapper">
+
+    <resultMap type="AnalysisScript" id="AnalysisScriptResult">
+        <result property="id" column="id"/>
+        <result property="scriptName" column="script_name"/>
+        <result property="scriptPath" column="script_path"/>
+        <result property="creater" column="creater"/>
+        <result property="createTime" column="create_time"/>
+        <result property="projectId" column="project_id"/>
+    </resultMap>
+
+    <sql id="selectAnalysisScriptVo">
+        select id, script_name, script_path, creater, create_time, project_id
+        from analysis_script
+    </sql>
+
+    <select id="selectAnalysisScriptList" parameterType="AnalysisScript" resultMap="AnalysisScriptResult">
+        <include refid="selectAnalysisScriptVo"/>
+        <where>
+            <if test="scriptName != null  and scriptName != ''">and script_name like concat('%', #{scriptName}, '%')
+            </if>
+            <if test="scriptPath != null  and scriptPath != ''">and script_path = #{scriptPath}</if>
+            <if test="creater != null  and creater != ''">and creater = #{creater}</if>
+            <if test="projectId != null ">and project_id = #{projectId}</if>
+        </where>
+    </select>
+
+    <select id="selectAnalysisScriptById" parameterType="Long" resultMap="AnalysisScriptResult">
+        <include refid="selectAnalysisScriptVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectByProjectId" parameterType="Long" resultMap="AnalysisScriptResult">
+        <include refid="selectAnalysisScriptVo"/>
+        where project_id = #{projectId}
+    </select>
+
+    <insert id="insertAnalysisScript" parameterType="AnalysisScript" useGeneratedKeys="true" keyProperty="id">
+        insert into analysis_script
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="scriptName != null">script_name,</if>
+            <if test="scriptPath != null">script_path,</if>
+            <if test="creater != null">creater,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="projectId != null">project_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="scriptName != null">#{scriptName},</if>
+            <if test="scriptPath != null">#{scriptPath},</if>
+            <if test="creater != null">#{creater},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="projectId != null">#{projectId},</if>
+        </trim>
+    </insert>
+
+    <update id="updateAnalysisScript" parameterType="AnalysisScript">
+        update analysis_script
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="scriptName != null">script_name = #{scriptName},</if>
+            <if test="scriptPath != null">script_path = #{scriptPath},</if>
+            <if test="creater != null">creater = #{creater},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAnalysisScriptById" parameterType="Long">
+        delete
+        from analysis_script
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteAnalysisScriptByIds" parameterType="String">
+        delete from analysis_script where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>
