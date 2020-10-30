@@ -128,4 +128,11 @@ public interface ISysRoleService
      * @return 结果
      */
     public int deleteRoleByIds(Long[] roleIds);
+
+    /**
+     *根据角色名称查询对应角色id
+     * @param roleName 角色名称
+     * @return 角色信息
+     */
+    public SysRole selectByRoleName(String roleName);
 }

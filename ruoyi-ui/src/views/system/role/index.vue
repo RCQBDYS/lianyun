@@ -348,6 +348,7 @@ export default {
       listRole(this.addDateRange(this.queryParams, this.dateRange)).then(
         response => {
           this.roleList = response.rows;
+          console.log(response.rows.nickName);
           this.total = response.total;
           this.loading = false;
         }

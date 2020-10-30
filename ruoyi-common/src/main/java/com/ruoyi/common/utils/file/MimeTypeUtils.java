@@ -32,7 +32,10 @@ public class MimeTypeUtils
             // 压缩文件
             "rar", "zip", "gz", "bz2",
             // pdf
-            "pdf" };
+            "pdf",
+            //python脚本
+            "py"
+    };
 
     public static String getExtension(String prefix)
     {

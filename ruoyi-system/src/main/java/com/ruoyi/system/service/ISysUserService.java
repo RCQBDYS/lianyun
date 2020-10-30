@@ -19,6 +19,12 @@ public interface ISysUserService
     public List<SysUser> selectUserList(SysUser user);
 
     /**
+     *查询用户的id以及对应的用户名称
+     * @return 用户id以及用户名称结果集
+     */
+    public List<SysUser> selectAllUsername();
+
+    /**
      * 通过用户名查询用户
      * 
      * @param userName 用户名
@@ -164,4 +170,11 @@ public interface ISysUserService
      * @return 结果
      */
     public String importUser(List<SysUser> userList, Boolean isUpdateSupport, String operName);
+
+    /**
+     *根据用户角色id查询用户信息表
+     * @param roleId 角色roleId
+     * @return 结果
+     */
+    public List<SysUser> selectByRoleId(Long roleId);
 }

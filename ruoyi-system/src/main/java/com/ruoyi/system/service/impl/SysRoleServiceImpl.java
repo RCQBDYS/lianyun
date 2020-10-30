@@ -315,4 +315,14 @@ public class SysRoleServiceImpl implements ISysRoleService
         }
         return roleMapper.deleteRoleByIds(roleIds);
     }
+
+    /**
+     *根据角色名称查询对应角色id
+     * @param roleName 角色名称
+     * @return 角色信息
+     */
+    @Override
+    public SysRole selectByRoleName(String roleName) {
+        return roleMapper.selectByRoleName(roleName);
+    }
 }

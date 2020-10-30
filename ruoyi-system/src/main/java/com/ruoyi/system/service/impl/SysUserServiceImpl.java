@@ -66,6 +66,11 @@ public class SysUserServiceImpl implements ISysUserService
         return userMapper.selectUserList(user);
     }
 
+    @Override
+    public List<SysUser> selectAllUsername() {
+        return userMapper.selectAllUsername();
+    }
+
     /**
      * 通过用户名查询用户
      * 
@@ -453,5 +458,10 @@ public class SysUserServiceImpl implements ISysUserService
             successMsg.insert(0, "恭喜您，数据已全部导入成功！共 " + successNum + " 条，数据如下：");
         }
         return successMsg.toString();
+    }
+
+    @Override
+    public List<SysUser> selectByRoleId(Long roleId) {
+        return userMapper.selectByRoleId(roleId);
     }
 }

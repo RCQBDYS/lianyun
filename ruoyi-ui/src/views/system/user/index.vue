@@ -227,12 +227,12 @@
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item v-if="form.userId == undefined" label="用户名称" prop="userName">
+            <el-form-item v-if="form.userId === undefined" label="用户名称" prop="userName">
               <el-input v-model="form.userName" placeholder="请输入用户名称" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item v-if="form.userId == undefined" label="用户密码" prop="password">
+            <el-form-item v-if="form.userId === undefined" label="用户密码" prop="password">
               <el-input v-model="form.password" placeholder="请输入用户密码" type="password" />
             </el-form-item>
           </el-col>
@@ -271,7 +271,7 @@
                   :key="item.postId"
                   :label="item.postName"
                   :value="item.postId"
-                  :disabled="item.status == 1"
+                  :disabled="item.status === 1"
                 ></el-option>
               </el-select>
             </el-form-item>
@@ -284,7 +284,7 @@
                   :key="item.roleId"
                   :label="item.roleName"
                   :value="item.roleId"
-                  :disabled="item.status == 1"
+                  :disabled="item.status === 1"
                 ></el-option>
               </el-select>
             </el-form-item>
@@ -544,7 +544,7 @@ export default {
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.userId);
-      this.single = selection.length != 1;
+      this.single = (selection.length !== 1);
       this.multiple = !selection.length;
     },
     /** 新增按钮操作 */
@@ -560,7 +560,7 @@ export default {
       });
     },
     /** 修改按钮操作 */
-    handleUpdate(row) {
+     handleUpdate(row) {
       this.reset();
       this.getTreeselect();
       const userId = row.userId || this.ids;
@@ -590,7 +590,7 @@ export default {
     submitForm: function() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if (this.form.userId != undefined) {
+          if (this.form.userId !== undefined) {
             updateUser(this.form).then(response => {
               this.msgSuccess("修改成功");
               this.open = false;

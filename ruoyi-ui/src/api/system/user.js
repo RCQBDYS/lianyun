@@ -9,7 +9,15 @@ export function listUser(query) {
     params: query
   })
 }
+//只查询用户id以及用户姓名
+export function listUserName(query) {
+  return request({
+    url: '/system/user/userNameList',
+    method: 'get',
+    params: query
+  })
 
+}
 // 查询用户详细
 export function getUser(userId) {
   return request({
@@ -58,7 +66,7 @@ export function resetUserPwd(userId, password) {
   const data = {
     userId,
     password
-  }
+  };
   return request({
     url: '/system/user/resetPwd',
     method: 'put',
@@ -71,7 +79,7 @@ export function changeUserStatus(userId, status) {
   const data = {
     userId,
     status
-  }
+  };
   return request({
     url: '/system/user/changeStatus',
     method: 'put',

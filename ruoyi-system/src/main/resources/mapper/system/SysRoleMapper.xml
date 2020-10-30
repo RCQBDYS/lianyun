@@ -82,7 +82,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	
 	<select id="checkRoleNameUnique" parameterType="String" resultMap="SysRoleResult">
 		<include refid="selectRoleVo"/>
-		 where r.role_name=#{roleName} limit 1
+		 where r.role_name= #{roleName} limit 1
 	</select>
 	
 	<select id="checkRoleKeyUnique" parameterType="String" resultMap="SysRoleResult">
@@ -149,5 +149,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			#{roleId}
         </foreach> 
  	</delete>
+
+	<select id="selectByRoleName" parameterType="String" resultMap="SysRoleResult">
+		<include refid="selectRoleVo"/>
+		where r.role_name = #{roleName}
+	</select>
  	
 </mapper> 
