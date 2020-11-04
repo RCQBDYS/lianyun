@@ -116,4 +116,18 @@ public class RuoYiConfig {
     public static String getUploadScriptPath() {
         return getProfile() + "/script";
     }
+
+    /**
+     *获取log上传路径
+     */
+    public static String getLogPath(){
+        return getProfile() +  "/log";
+    }
+
+    /**
+     *获取log Result上传路径
+     */
+    public static String getLogResultPath(){
+        return getProfile() + "/logResult";
+    }
 }

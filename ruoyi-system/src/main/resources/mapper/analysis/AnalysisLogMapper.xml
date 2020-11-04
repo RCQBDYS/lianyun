@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.analysis.mapper.AnalysisLogMapper">
+    
+    <resultMap type="AnalysisLog" id="AnalysisLogResult">
+        <result property="logId"    column="log_id"    />
+        <result property="logName"    column="log_name"    />
+        <result property="logPath"    column="log_path"    />
+        <result property="logUploader"    column="log_uploader"    />
+        <result property="logTime"    column="log_time"    />
+        <result property="scriptId"    column="script_id"    />
+    </resultMap>
+
+    <sql id="selectAnalysisLogVo">
+        select log_id, log_name, log_path, log_uploader, log_time, script_id from analysis_log
+    </sql>
+
+    <select id="selectAnalysisLogList" parameterType="AnalysisLog" resultMap="AnalysisLogResult">
+        <include refid="selectAnalysisLogVo"/>
+        <where>  
+            <if test="logName != null  and logName != ''"> and log_name like concat('%', #{logName}, '%')</if>
+            <if test="logPath != null  and logPath != ''"> and log_path = #{logPath}</if>
+            <if test="logUploader != null  and logUploader != ''"> and log_uploader = #{logUploader}</if>
+            <if test="logTime != null "> and log_time = #{logTime}</if>
+            <if test="scriptId != null "> and script_id = #{scriptId}</if>
+        </where>
+    </select>
+    
+    <select id="selectAnalysisLogById" parameterType="Long" resultMap="AnalysisLogResult">
+        <include refid="selectAnalysisLogVo"/>
+        where log_id = #{logId}
+    </select>
+        
+    <insert id="insertAnalysisLog" parameterType="AnalysisLog" useGeneratedKeys="true" keyProperty="logId">
+        insert into analysis_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="logName != null">log_name,</if>
+            <if test="logPath != null">log_path,</if>
+            <if test="logUploader != null">log_uploader,</if>
+            <if test="logTime != null">log_time,</if>
+            <if test="scriptId != null">script_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="logName != null">#{logName},</if>
+            <if test="logPath != null">#{logPath},</if>
+            <if test="logUploader != null">#{logUploader},</if>
+            <if test="logTime != null">#{logTime},</if>
+            <if test="scriptId != null">#{scriptId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAnalysisLog" parameterType="AnalysisLog">
+        update analysis_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="logName != null">log_name = #{logName},</if>
+            <if test="logPath != null">log_path = #{logPath},</if>
+            <if test="logUploader != null">log_uploader = #{logUploader},</if>
+            <if test="logTime != null">log_time = #{logTime},</if>
+            <if test="scriptId != null">script_id = #{scriptId},</if>
+        </trim>
+        where log_id = #{logId}
+    </update>
+
+    <delete id="deleteAnalysisLogById" parameterType="Long">
+        delete from analysis_log where log_id = #{logId}
+    </delete>
+
+    <delete id="deleteAnalysisLogByIds" parameterType="String">
+        delete from analysis_log where log_id in 
+        <foreach item="logId" collection="array" open="(" separator="," close=")">
+            #{logId}
+        </foreach>
+    </delete>
+    
+</mapper>

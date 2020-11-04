@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.analysis.mapper.AnalysisResultMapper">
+    
+    <resultMap type="AnalysisResult" id="AnalysisResultResult">
+        <result property="resultId"    column="result_id"    />
+        <result property="resultName"    column="result_name"    />
+        <result property="resultPath"    column="result_path"    />
+        <result property="resultCreattime"    column="result_creatTime"    />
+        <result property="scriptId"    column="script_id"    />
+    </resultMap>
+
+    <sql id="selectAnalysisResultVo">
+        select result_id, result_name, result_path, result_creatTime, script_id from analysis_result
+    </sql>
+
+    <select id="selectAnalysisResultList" parameterType="AnalysisResult" resultMap="AnalysisResultResult">
+        <include refid="selectAnalysisResultVo"/>
+        <where>  
+            <if test="resultName != null  and resultName != ''"> and result_name like concat('%', #{resultName}, '%')</if>
+            <if test="resultPath != null  and resultPath != ''"> and result_path = #{resultPath}</if>
+            <if test="resultCreattime != null "> and result_creatTime = #{resultCreattime}</if>
+            <if test="scriptId != null "> and script_id = #{scriptId}</if>
+        </where>
+    </select>
+    
+    <select id="selectAnalysisResultByScriptId" parameterType="Long" resultMap="AnalysisResultResult">
+        <include refid="selectAnalysisResultVo"/>
+        where script_id = #{scriptId}
+    </select>
+
+    <select id="selectAnalysisResultById" parameterType="Long" resultMap="AnalysisResultResult">
+        <include refid="selectAnalysisResultVo"/>
+        where result_id = #{resultId}
+    </select>
+        
+    <insert id="insertAnalysisResult" parameterType="AnalysisResult" useGeneratedKeys="true" keyProperty="resultId">
+        insert into analysis_result
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="resultName != null">result_name,</if>
+            <if test="resultPath != null">result_path,</if>
+            <if test="resultCreattime != null">result_creatTime,</if>
+            <if test="scriptId != null">script_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="resultName != null">#{resultName},</if>
+            <if test="resultPath != null">#{resultPath},</if>
+            <if test="resultCreattime != null">#{resultCreattime},</if>
+            <if test="scriptId != null">#{scriptId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAnalysisResult" parameterType="AnalysisResult">
+        update analysis_result
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="resultName != null">result_name = #{resultName},</if>
+            <if test="resultPath != null">result_path = #{resultPath},</if>
+            <if test="resultCreattime != null">result_creatTime = #{resultCreattime},</if>
+            <if test="scriptId != null">script_id = #{scriptId},</if>
+        </trim>
+        where script_id = #{scriptId}
+    </update>
+
+    <delete id="deleteAnalysisResultById" parameterType="Long">
+        delete from analysis_result where result_id = #{resultId}
+    </delete>
+
+    <delete id="deleteAnalysisResultByIds" parameterType="String">
+        delete from analysis_result where result_id in 
+        <foreach item="resultId" collection="array" open="(" separator="," close=")">
+            #{resultId}
+        </foreach>
+    </delete>
+    
+</mapper>
