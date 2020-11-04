@@ -34,7 +34,9 @@ public class MimeTypeUtils
             // pdf
             "pdf",
             //python脚本
-            "py"
+            "py",
+            //log文件
+            "log"
     };
 
     public static String getExtension(String prefix)

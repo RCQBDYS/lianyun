@@ -11,11 +11,21 @@
         <result property="creater" column="creater"/>
         <result property="createTime" column="create_time"/>
         <result property="projectId" column="project_id"/>
+        <association property="analysisLog" column="log_id" javaType="AnalysisLog" resultMap="logResult" />
+    </resultMap>
+
+    <resultMap id="logResult" type="AnalysisLog">
+        <id property="logId"    column="log_id"    />
+        <result property="logName"    column="log_name"    />
+        <result property="logPath"    column="log_path"    />
+        <result property="logUploader"    column="log_uploader"    />
+        <result property="logTime"    column="log_time"    />
+        <result property="scriptId"    column="script_id"    />
     </resultMap>
 
     <sql id="selectAnalysisScriptVo">
-        select id, script_name, script_path, creater, create_time, project_id
-        from analysis_script
+        select s.id, s.script_name, s.script_path, s.creater, s.create_time, s.project_id, l.log_id,l.log_name,l.log_path,l.log_time,l.log_uploader,l.script_id
+        from analysis_script s left join analysis_log l on s.id = l.script_id
     </sql>
 
     <select id="selectAnalysisScriptList" parameterType="AnalysisScript" resultMap="AnalysisScriptResult">

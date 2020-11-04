@@ -79,25 +79,28 @@
               :tree-props="{children:'children',hasChildren:'hasChildren'}" lazy
               @selection-change="handleSelectionChange">
       <el-table-column type="selection" :selectable="checkboxT" width="55" align="center"/>
-      <el-table-column label="项目编号" width="120">
+      <el-table-column label="项目编号" width="100">
         <template slot-scope="{row}">
           {{ row.id }}
         </template>
       </el-table-column>
-      <el-table-column label="项目名称" prop="projectName" :show-overflow-tooltip="true" width="150"/>
-      <el-table-column label="脚本名称" prop="scriptName" :show-overflow-tooltip="true" width="150"/>
-      <el-table-column label="上传者" prop="creater" width="100"/>
+      <el-table-column label="项目名称" prop="projectName" :show-overflow-tooltip="true" width="180"/>
+      <el-table-column label="脚本名称" prop="scriptName" :show-overflow-tooltip="true" width="120"/>
+      <el-table-column label="上传者" prop="creater" width="80"/>
       <el-table-column label="创建时间" align="center" prop="createTime" width="180"/>
-      <el-table-column label="开发负责人" width="180">
+      <el-table-column label="开发负责人" width="100">
         <template slot-scope="{row}">
           {{ row.developId | userNameFilter}}
         </template>
       </el-table-column>
-      <el-table-column label="测试负责人" prop="testId" width="180">
+      <el-table-column label="测试负责人" prop="testId" width="100">
         <template slot-scope="{row}">
           {{row.testId | userNameFilter}}
         </template>
       </el-table-column>
+      <el-table-column label="log名称" width="120" prop="analysisLog.logName"/>
+      <el-table-column label="log上传者" width="100" prop="analysisLog.logUploader" />
+      <el-table-column label="log上传时间" width="180" align="center" prop="analysisLog.logTime" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <!--项目添加按钮-->
@@ -145,6 +148,35 @@
             icon="el-icon-delete"
             @click="scriptDelete(scope.row)"
           >删除
+          </el-button>
+          <!--log的添加-->
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-plus"
+            v-if="scope.row.scriptName"
+            @click="logHandleAdd(scope.row)"
+          >
+            log添加
+          </el-button>
+          <!--log的修改-->
+          <el-button
+          size="mini"
+          type="text"
+          icon="el-icon-edit"
+          v-if="scope.row.scriptName"
+          @click="logUpdate(scope.row)"
+          >
+            log修改
+          </el-button>
+          <el-button
+          size="mini"
+          type="text"
+          icon="el-icon-download"
+          v-if="scope.row.scriptName"
+          @click="downLoad(scope.row)"
+          >
+            log结果下载
           </el-button>
         </template>
       </el-table-column>
@@ -229,14 +261,47 @@
       </div>
     </el-dialog>
 
-
+    <!--日志文件的上传-->
+    <el-dialog :title="title" :model="logUpload" :visible.sync="logOpen" width="550px" append-to-body>
+      <el-form  label-width="100px">
+        <el-form-item label="脚本名称" v-if="logUpload.scriptName">
+          <el-input disabled v-model="logUpload.scriptName"></el-input>
+        </el-form-item>
+        <el-form-item label="上传log">
+          <el-upload
+            ref="logUpload"
+            :limit="1"
+            accept=".text,.log"
+            :action="logUpload.url"
+            :headers="logUpload.headers"
+            :data="logUpload.data"
+            :file-list="logUpload.fileList"
+            :on-progress="logUploadProgress"
+            :on-success="logUploadSuccess"
+            :auto-upload="false"
+            drag
+          >
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">
+              将文件拖到此处，或
+              <em>点击上传</em>
+            </div>
+          </el-upload>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button :loading="logUpload.isUploading" type="primary" @click="logSubmitFileForm">确 定</el-button>
+        <el-button @click=" logOpen = false">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
   import {getTester, getDevelop, addProject, listProject, updateProject, delProject} from '@/api/analysis/project';
-  import {getScriptByPI, delScript} from '@/api/analysis/script';
+  import {getScriptByPI, delScript, getScript} from '@/api/analysis/script';
   import {listUserName} from '@/api/system/user';
+  import {getResult,downloadResult,getResultByScriptId} from '@/api/analysis/result';
   import {getToken} from "@/utils/auth";
 
   let allName = [];
@@ -253,10 +318,10 @@
       return {
         //数据加载标志
         loading: false,
-        // 项目对话框是否显示
+        // 对话框是否显示
         open: false,
-        // 脚本对话框的显示
         scriptOpen: false,
+        logOpen: false,
         // 对话框标题
         title: undefined,
         //测试人数据表
@@ -265,7 +330,7 @@
         developerOption: [],
         // 选中数组
         ids: [],
-        //项目对话框参数
+        //对话框参数
         form: {
           // 项目id
           id: undefined,
@@ -278,7 +343,6 @@
           //项目备注
           remark: undefined,
         },
-        //脚本对话框参数
         upload: {
           //项目名称
           projectName: undefined,
@@ -295,6 +359,21 @@
           // 上传的地址
           url: process.env.VUE_APP_BASE_API + "/analysis/script/importData",
           //上传的文件名称以及路径
+          fileList: []
+        },
+        logUpload: {
+          scriptName: undefined,
+          data:{
+            //项目id
+            projectId: undefined,
+          //  脚本id
+            scriptId: undefined,
+          //  logId
+            logId: undefined,
+          },
+          isUploading: false,
+          headers: {Authorization: "Bearer " + getToken()},
+          url: process.env.VUE_APP_BASE_API + '/analysis/log',
           fileList: []
         },
         //项目信息列表
@@ -342,21 +421,9 @@
         //  根据条件进行用户信息的查询
         listProject(this.queryParams).then(response => {
           this.projectList = response.rows;
-          // const temp = response.rows;
           //进行脚本信息是否存在的判断
           this.projectList.forEach(function (item, index) {
             _self.projectList[index].hasChildren = true;
-            /*getScriptByPI(item.id).then(response => {
-
-
-              /!*const data = response.data.length;
-              _self.projectList = temp;
-              if (data !== 0) {
-                _self.projectList[index].hasChildren = true;
-                _self.$forceUpdate();
-              }*!/
-
-            });*/
           });
 
           this.total = response.total;
@@ -384,6 +451,24 @@
         this.upload.data.projectId = row.id;
         this.scriptOpen = true;
         this.title = "添加脚本";
+      },
+      logHandleAdd(row){
+        //判断是否以存在log文件确定文件的唯一性
+        if(row.analysisLog){
+          this.$alert('log文件已存在请勿重复添加','提示',{
+            confirmButtonText: '确定',
+            type: 'warning'
+          })
+        } else {
+          this.logReset();
+          this.logUpload.scriptName = row.scriptName;
+          this.logUpload.data.scriptId = row.id;
+          getScript(row.id).then(response => {
+            this.logUpload.data.projectId = response.data.projectId;
+          });
+          this.logOpen = true;
+          this.title = 'log添加';
+        }
       },
       //项目信息提交
       submitForm: function () {
@@ -426,6 +511,24 @@
         this.upload.data.id = row.id;
         this.upload.url = process.env.VUE_APP_BASE_API + "/analysis/script/updateScript";
         this.scriptOpen = true;
+      },
+      logUpdate(row){
+        if(row.analysisLog) {
+          this.logUpload.scriptName = row.scriptName;
+          const log = row.analysisLog;
+          this.logUpload.data.logId = log.logId;
+          getScript(row.id).then(response => {
+            this.logUpload.data.projectId = response.data.projectId;
+          });
+          this.logUpload.url=  process.env.VUE_APP_BASE_API + "/analysis/log/updateLog";
+          this.logOpen = true;
+          this.title = 'log修改';
+        } else {
+         this.$alert('log文件不存在，请先添加log文件','提示',{
+           confirmButtonText:'确定',
+           type: 'warning'
+         })
+        }
       },
       // 项目删除按钮
       handleDelete(row) {
@@ -493,6 +596,23 @@
           fileList: []
         };
       },
+      logReset(){
+        this.logUpload = {
+          scriptName: undefined,
+          data:{
+            //项目id
+            projectId: undefined,
+            //  脚本id
+            scriptId: undefined,
+            //  logId
+            logId: undefined,
+          },
+          isUploading: false,
+          headers: {Authorization: "Bearer " + getToken()},
+          url: process.env.VUE_APP_BASE_API + '/analysis/log',
+          fileList: []
+        }
+      },
       // 查询测试人员
       getTesterSelect() {
         getTester().then(response => {
@@ -514,6 +634,9 @@
       handleFileUploadProgress(event, file, fileList) {
         this.upload.isUploading = true;
       },
+      logUploadProgress(event, file , fileList){
+        this.logUpload.isUploading = true;
+      },
       // 文件上传成功处理
       handleFileSuccess(response, file, fileList) {
         this.upload.isUploading = false;
@@ -523,9 +646,21 @@
         const id = this.upload.data.projectId;
         this.refreshLoadTree(id)
       },
+      logUploadSuccess(response,file, fileList){
+        this.logUpload.isUploading = false;
+        this.form.filePath = response.url;
+        this.logOpen = false;
+        this.msgSuccess(response.msg);
+        const id = this.logUpload.data.projectId;
+        console.log(id);
+        this.refreshLoadTree(id);
+      },
       // 脚本文件的提交
       submitFileForm() {
         this.$refs.upload.submit()
+      },
+      logSubmitFileForm(){
+        this.$refs.logUpload.submit();
       },
       //  表中数据字节点数据异步加载
       load(tree, treeNode, resolve) {
@@ -535,7 +670,6 @@
         //  根据projectId读取脚本的信息
         getScriptByPI(projectId).then(response => {
           const menuList = response.data;
-          // console.log(menuList);
           resolve(menuList);
         })
       },
@@ -572,6 +706,29 @@
             }
           }
         });
+      },
+    //  结果预览
+      seeResult(row){
+
+      },
+      downLoad(row){
+        console.log(row.id);
+        downloadResult(row.id).then(response => {
+          let blob = new Blob([response],{
+            type: "application/vnd.ms-excel;charset=utf-8"
+          });
+          const fileName = "logResult"+  Date.parse(new Date()) + ".xlsx";
+          if (window.navigator.msSaveOrOpenBlob) {
+            navigator.msSaveBlob(blob, fileName);
+          } else {
+            var link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+            //释放内存
+            window.URL.revokeObjectURL(link.href);
+          }
+        })
       }
     }
   }

@@ -71,9 +71,8 @@ public class AnalysisScriptController extends BaseController
     }
 
     /**
-     * 获取【请填写功能名称】详细信息
+     * 获取【对应scriptId脚本的】详细信息
      */
-    @PreAuthorize("@ss.hasPermi('system:script:query')")
     @GetMapping(value = "/{scriptId}")
     public AjaxResult getInfo(@PathVariable("scriptId") Long scriptId)
     {

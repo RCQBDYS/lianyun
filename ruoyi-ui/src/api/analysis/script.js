@@ -9,10 +9,10 @@ export function listScript(query) {
   })
 }
 
-// 查询【请填写功能名称】详细
+// 查询【scriptId脚本对应的信息】详细
 export function getScript(scriptId) {
   return request({
-    url: '/system/script/' + scriptId,
+    url: '/analysis/script/' + scriptId,
     method: 'get'
   })
 }
